@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Naming — Agent IA Guichet de la Demande · SNCF Réseau</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Arial,sans-serif;background:#f7f2ff;min-height:100vh}
+
+    .header{background:linear-gradient(135deg,#8B1A8B 0%,#E2001A 100%);padding:28px 32px 22px;position:relative;overflow:hidden}
+    .header-dots{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.12) 1px,transparent 1px);background-size:24px 24px}
+    .header-inner{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .badge{display:inline-block;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:10px;font-weight:700;letter-spacing:1.5px;padding:4px 12px;border-radius:20px;text-transform:uppercase;margin-bottom:10px}
+    .header h1{font-size:26px;font-weight:900;color:#fff;line-height:1.15}
+    .header h1 span{opacity:0.7;font-size:14px;font-weight:400;display:block;margin-top:4px}
+    .logo-box{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:10px;padding:8px 14px;display:inline-block}
+    .logo-box .sncf{font-size:15px;font-weight:900;color:#fff;letter-spacing:1px}
+    .logo-box .reseau{font-size:9px;color:rgba(255,255,255,0.7);letter-spacing:3px;text-transform:uppercase;margin-top:1px}
+    .rail{height:6px;background:repeating-linear-gradient(90deg,rgba(139,26,139,0.3) 0px,rgba(139,26,139,0.3) 20px,transparent 20px,transparent 28px)}
+
+    .main{max-width:900px;margin:0 auto;padding:28px 20px 48px}
+
+    /* Contexte */
+    .context-card{background:#fff;border-radius:14px;border:1px solid #ede0f5;padding:24px 28px;margin-bottom:24px}
+    .context-card h2{font-size:13px;font-weight:700;color:#8B1A8B;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px}
+    .context-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media(max-width:600px){.context-grid{grid-template-columns:1fr}}
+    .context-block{background:#faf6ff;border-radius:10px;padding:14px 16px;border:1px solid #ede0f5}
+    .context-block h3{font-size:11px;font-weight:700;color:#E2001A;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+    .context-block ul{list-style:none;padding:0}
+    .context-block ul li{font-size:12px;color:#555;padding:3px 0;padding-left:12px;position:relative;line-height:1.4}
+    .context-block ul li::before{content:'—';position:absolute;left:0;color:#8B1A8B;font-size:11px}
+    .solution-band{background:linear-gradient(135deg,#8B1A8B,#E2001A);border-radius:10px;padding:14px 20px;margin-bottom:16px;text-align:center}
+    .solution-band .sol-label{font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,0.7);text-transform:uppercase;margin-bottom:4px}
+    .solution-band .sol-text{font-size:13px;color:#fff;font-weight:500}
+
+    /* Form */
+    .form-card{background:#fff;border-radius:14px;border:1px solid #ede0f5;padding:24px 28px;margin-bottom:28px}
+    .form-card h2{font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:6px}
+    .form-card p{font-size:13px;color:#888;margin-bottom:18px;line-height:1.5}
+    .input-row{display:flex;gap:10px;align-items:stretch}
+    .name-input{flex:1;border:1.5px solid #e0d0f0;border-radius:10px;padding:12px 16px;font-size:14px;font-family:inherit;color:#1a1a1a;outline:none;transition:border-color 0.2s}
+    .name-input:focus{border-color:#8B1A8B}
+    .name-input::placeholder{color:#bbb}
+    .submit-btn{background:linear-gradient(135deg,#8B1A8B,#E2001A);color:#fff;border:none;border-radius:10px;padding:12px 22px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:opacity 0.2s}
+    .submit-btn:hover{opacity:0.88}
+    .submit-btn:disabled{opacity:0.5;cursor:not-allowed}
+    .char-count{font-size:11px;color:#ccc;text-align:right;margin-top:6px}
+    .status{font-size:12px;text-align:center;margin-top:10px;min-height:18px;font-weight:500}
+
+    .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .section-title{font-size:13px;font-weight:700;color:#8B1A8B;letter-spacing:1.5px;text-transform:uppercase}
+    .right-header{display:flex;align-items:center;gap:8px}
+    .count-badge{background:linear-gradient(135deg,#8B1A8B,#E2001A);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+    .refresh-btn{background:none;border:1px solid #e0d0f0;border-radius:8px;padding:5px 12px;font-size:11px;color:#8B1A8B;cursor:pointer;font-family:inherit;transition:background 0.15s}
+    .refresh-btn:hover{background:#f0e8ff}
+
+    .wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+    .idea-card{background:#fff;border:1px solid #ede0f5;border-radius:12px;padding:16px 18px;position:relative;animation:popIn 0.3s ease}
+    @keyframes popIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}
+    .idea-name{font-size:18px;font-weight:800;color:#1a1a1a;line-height:1.2;word-break:break-word}
+    .idea-dot{position:absolute;top:12px;right:14px;width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#8B1A8B,#E2001A)}
+    .empty-state{text-align:center;padding:48px 20px;color:#ccc;font-size:13px;grid-column:1/-1}
+    .empty-icon{font-size:36px;margin-bottom:10px;opacity:0.4}
+    .loading-wall{text-align:center;padding:32px;color:#bbb;font-size:13px;grid-column:1/-1}
+    .hint{font-size:11px;color:#bbb;text-align:center;margin-top:20px;font-style:italic}
+    .error-input{border-color:#E2001A !important}
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-dots"></div>
+  <div class="header-inner">
+    <div>
+      <div class="badge">✦ Naming participatif</div>
+      <h1>Quel nom pour notre agent IA ?
+        <span>Guichet de la Demande — Lab.IA · SNCF Réseau</span>
+      </h1>
+    </div>
+    <div>
+      <div class="logo-box">
+        <div class="sncf">SNCF</div>
+        <div class="reseau">Réseau</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="rail"></div>
+
+<div class="main">
+
+  <!-- Contexte -->
+  <div class="context-card">
+    <h2>Contexte — Agent IA Guichet de la Demande</h2>
+
+    <div class="solution-band">
+      <div class="sol-label">Solution</div>
+      <div class="sol-text">Un chatbot agentique capable de converser en autonomie et d'assister la production de réponses</div>
+    </div>
+
+    <div class="context-grid">
+      <div class="context-block">
+        <h3>Contexte</h3>
+        <ul>
+          <li>Les métiers ne savent pas toujours ce que fait le Lab.IA ni comment y accéder</li>
+          <li>Pas de point d'entrée unique : les demandes arrivent de façon dispersée</li>
+          <li>Les métiers cherchent à être accompagnés, formés et mis en relation</li>
+        </ul>
+      </div>
+      <div class="context-block">
+        <h3>Besoins</h3>
+        <ul>
+          <li>Accéder à l'offre de services et aux projets du Lab.IA</li>
+          <li>Être mis en relation avec les bonnes personnes</li>
+          <li>Être informé des événements et actualités IA</li>
+          <li>Accéder aux ressources et services techniques</li>
+        </ul>
+      </div>
+      <div class="context-block">
+        <h3>Fonctionnalités</h3>
+        <ul>
+          <li>Répondre en langage naturel</li>
+          <li>Orienter et mettre en relation avec le bon interlocuteur</li>
+          <li>Envoyer des messages (mail, Teams)</li>
+          <li>Créer des tickets JIRA</li>
+          <li>Identifier les questions sensibles et escalader vers un humain</li>
+        </ul>
+      </div>
+      <div class="context-block">
+        <h3>Gains attendus</h3>
+        <ul>
+          <li>Gain de temps pour les métiers et le Lab.IA</li>
+          <li>Meilleure qualité et réactivité de la communication</li>
+          <li>Amélioration de l'image et de la réputation du Lab.IA</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulaire -->
+  <div class="form-card">
+    <h2>Proposez un nom pour cet agent</h2>
+    <p>Un prénom, un acronyme, une métaphore… laissez parler votre créativité. Les meilleures idées seront soumises au vote de tous.</p>
+    <div class="input-row">
+      <input class="name-input" id="nameInput" type="text" placeholder="Ex : ARIA, FELIX, LAB'O, ORIENT.IA…" maxlength="40" oninput="updateCount()"/>
+      <button class="submit-btn" id="submitBtn" onclick="submitIdea()">Proposer ✦</button>
+    </div>
+    <div class="char-count" id="charCount">0 / 40</div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <!-- Mur -->
+  <div>
+    <div class="section-header">
+      <div class="section-title">Mur des idées</div>
+      <div class="right-header">
+        <button class="refresh-btn" onclick="loadIdeas()">↻ Rafraîchir</button>
+        <div class="count-badge" id="countBadge">…</div>
+      </div>
+    </div>
+    <div class="wall" id="wall">
+      <div class="loading-wall">Chargement des idées…</div>
+    </div>
+  </div>
+
+  <div class="hint">Les propositions seront rassemblées pour un vote final.</div>
+</div>
+
+<script>
+  const BASE_ID = 'appTtg6X9tWy9oNHl';
+  const TABLE   = 'tblGg9DN7fgYGD6Gh';
+  const TOKEN   = 'patbqQwZKRzDmyorb.24a354aa5f6ab77ca84cb0320a3f69e2ea155d072d4360623dbdcf46e67cfd6e';
+  const API     = `https://api.airtable.com/v0/${BASE_ID}/${TABLE}`;
+  const HEADERS = { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+
+  let cachedIdeas = [];
+
+  function escHtml(t){
+    return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function updateCount(){
+    document.getElementById('charCount').textContent = document.getElementById('nameInput').value.length + ' / 40';
+  }
+  function setStatus(msg, color='#8B1A8B'){
+    const el = document.getElementById('status');
+    el.style.color = color;
+    el.textContent = msg;
+    if(msg) setTimeout(()=>{ if(el.textContent===msg) el.textContent=''; }, 3500);
+  }
+  function render(ideas){
+    const wall = document.getElementById('wall');
+    const n = ideas.length;
+    document.getElementById('countBadge').textContent = n + (n<=1?' idée':' idées');
+    if(n===0){
+      wall.innerHTML = `<div class="empty-state"><div class="empty-icon">💡</div>Soyez le premier à proposer un nom !</div>`;
+      return;
+    }
+    wall.innerHTML = ideas.map(name => `
+      <div class="idea-card">
+        <div class="idea-name">${escHtml(name)}</div>
+        <div class="idea-dot"></div>
+      </div>`).join('');
+  }
+  async function loadIdeas(){
+    try {
+      const res = await fetch(`${API}?sort[0][field]=Nom&sort[0][direction]=asc`, { headers: HEADERS });
+      const data = await res.json();
+      cachedIdeas = (data.records || []).map(r => r.fields['Nom']).filter(Boolean);
+      render(cachedIdeas);
+    } catch(e){
+      setStatus('Erreur de chargement.', '#E2001A');
+    }
+  }
+  async function submitIdea(){
+    const input = document.getElementById('nameInput');
+    const btn   = document.getElementById('submitBtn');
+    const val   = input.value.trim();
+    if(!val) return;
+    if(cachedIdeas.some(i => i.toLowerCase() === val.toLowerCase())){
+      input.classList.add('error-input');
+      setTimeout(()=>input.classList.remove('error-input'), 1200);
+      setStatus('Cette idée existe déjà !', '#E2001A');
+      return;
+    }
+    btn.disabled = true;
+    setStatus('Envoi en cours…');
+    try {
+      const res = await fetch(API, {
+        method: 'POST',
+        headers: HEADERS,
+        body: JSON.stringify({ records: [{ fields: { Nom: val } }] })
+      });
+      if(!res.ok) throw new Error();
+      input.value = '';
+      document.getElementById('charCount').textContent = '0 / 40';
+      setStatus('Idée ajoutée ✓', '#0a7a4a');
+      await loadIdeas();
+    } catch(e){
+      setStatus("Erreur lors de l'envoi. Réessayez.", '#E2001A');
+    }
+    btn.disabled = false;
+  }
+  document.getElementById('nameInput').addEventListener('keydown', e => {
+    if(e.key === 'Enter') submitIdea();
+  });
+  loadIdeas();
+  setInterval(loadIdeas, 20000);
+</script>
+</body>
+</html>
